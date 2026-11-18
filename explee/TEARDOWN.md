@@ -53,7 +53,8 @@ Moving the pointer over the input makes the dots rush (about 24× faster) and se
   nearly one point). Start x = 0, end x = width. "s-curve" puts both control points at the start and end y, pulled
   `width · curvature` horizontally, so each path is a smooth S from wide to narrow. Two other shapes exist
   (`inner-curve`, `outer-curve`) that bow the controls towards or away from the centre line.
-- Constant-speed motion (lines 283–295, 575–591): each Bézier is sampled at 64 points into a cumulative length table;
+- Constant-speed motion (lines 283–295, 575–591): each Bézier is cut into 64 segments (65 samples, t = 0…1) whose
+  cumulative, normalised lengths form a table;
   a dot's linear progress `u` is mapped through a binary search of that table to the Bézier `t`, so dots move at even
   speed along the curve instead of bunching where the curve is tight.
 - Dots (lines 402–434): per path, `dotsPerPath` dots with a seeded pseudo-random start offset and start delay

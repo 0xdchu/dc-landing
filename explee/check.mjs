@@ -105,16 +105,39 @@ const headlineText = page => page.evaluate(() => {
     });
     return {
       state: line.dataset.state,
-      ratio: words.length ? shown.length / words.length : 0,
-      text: shown.map(w => w.textContent.trim()).join(' '),
+      full: words.length > 0 && shown.length === words.length,
+      text: words.map(w => w.textContent.trim()).join(' ').replace(/\s+/g, ' ').trim(),
     };
   };
-  const all = lines.map(read);
-  const full = all.filter(x => x.ratio === 1);
-  const pick = full.find(x => x.state === 'enter') || full.find(x => x.state === 'shown') || full[0];
-  if (pick) return pick.text;
-  return all.sort((a, b) => b.ratio - a.ratio)[0].text;
+  const full = lines.map(read).filter(x => x.full && x.state !== 'hidden' && x.state !== 'exit');
+  const pick = full.find(x => x.state === 'enter') || full.find(x => x.state === 'shown');
+  return pick ? pick.text : '';
 });
+
+const headlineSentences = page => page.evaluate(() => [...document.querySelectorAll('#cta-swap .word-line')]
+  .map(line => line.textContent.replace(/\s+/g, ' ').trim()));
+
+// a swap only counts when a different, complete sentence is fully visible
+async function pollHeadline(page, known, exclude, timeout = 5600, step = 200) {
+  const t0 = Date.now();
+  while (Date.now() - t0 < timeout) {
+    const text = await headlineText(page);
+    if (text && text !== exclude && known.includes(text)) return { changed: true, first: exclude, next: text };
+    await page.waitForTimeout(step);
+  }
+  return { changed: false, first: exclude, next: await headlineText(page) };
+}
+
+// the loader steps every 150 ms, so sample faster than its 600 ms full cycle
+const loaderSamples = (page, count = 11, step = 130) => page.evaluate(async ([n, ms]) => {
+  const el = document.getElementById('loader');
+  const seen = new Set();
+  for (let i = 0; i < n; i++) {
+    seen.add(el.dataset.lit);
+    await new Promise(r => setTimeout(r, ms));
+  }
+  return [...seen];
+}, [count, step]);
 
 const canvasInfo = page => page.evaluate(() => [...document.querySelectorAll('[data-flow-canvas]')].map(c => {
   const r = c.getBoundingClientRect();
@@ -151,6 +174,18 @@ const overflow = page => page.evaluate(() => document.documentElement.scrollWidt
   await page.goto(`${origin}/explee/`, { waitUntil: 'networkidle' });
   await page.waitForTimeout(500);
   await page.screenshot({ path: join(OUT, 'desktop-fold.png') });
+  const firstHeadline = await headlineText(page);
+
+  const offscreenLoops = await page.evaluate(() => document.getAnimations()
+    .filter(a => a.playState === 'running' && a.effect?.getComputedTiming().iterations === Infinity)
+    .filter(a => {
+      const target = a.effect?.target;
+      if (!target || typeof target.getBoundingClientRect !== 'function') return false;
+      const r = target.getBoundingClientRect();
+      return r.bottom < 0 || r.top > window.innerHeight || r.right < 0 || r.left > window.innerWidth;
+    })
+    .map(a => a.animationName || 'animation'));
+  expect(offscreenLoops.length === 0, 'desktop', `looping CSS animations outside the viewport are paused (${offscreenLoops.join(', ') || 'none'})`);
 
   // 1. hero flow lines
   const frames0 = await canvasInfo(page);
@@ -252,6 +287,19 @@ const overflow = page => page.evaluate(() => document.documentElement.scrollWidt
   await page.waitForTimeout(950);
   const listTick2 = await page.evaluate(() => Number(document.querySelector('#agent-list').dataset.tick));
   expect(listTick2 > stack.listTick, 'effect 5 stack', `card 1's list advances (step ${stack.listTick} → ${listTick2})`);
+
+  // finding 3: leave during the completion pause, come back, and the list must restart
+  await page.waitForFunction(() => document.querySelector('#agent-list').dataset.step === '6', null, { timeout: 8000 });
+  await scrollToId(page, '#pricing');
+  await page.waitForTimeout(3400);
+  await scrollToStackCard(page, 3);
+  await page.waitForTimeout(200);
+  const restarted = await page.waitForFunction(
+    () => document.querySelector('#agent-list').dataset.step !== '6',
+    null,
+    { timeout: 6000 },
+  ).then(() => true).catch(() => false);
+  expect(restarted, 'effect 5 stack', 'the finished list restarts after leaving during its pause');
   await page.screenshot({ path: join(OUT, 'desktop-stack.png') });
 
   // 7. pixel loader and soft edges
@@ -273,11 +321,17 @@ const overflow = page => page.evaluate(() => document.documentElement.scrollWidt
   const translucent = /rgba\([^)]*,\s*0?\.\d+\)/.test(edges.bg || '');
   expect(/blur/.test(edges.backdrop || '') || translucent, 'effect 7 loader', `sticky header blurs what scrolls under it (${edges.backdrop || edges.bg})`);
 
+  await scrollToStackCard(page, 5, 0);
+  await page.waitForTimeout(400);
   const pulse = await page.evaluate(() => {
-    const dot = document.querySelector('.status-dot');
-    return dot.getAnimations().some(a => a.playState === 'running');
+    const dot = document.querySelector('.camp-status .status-dot');
+    const r = dot.getBoundingClientRect();
+    return {
+      onScreen: r.top < window.innerHeight && r.bottom > 0,
+      running: dot.getAnimations().some(a => a.playState === 'running'),
+    };
   });
-  expect(pulse, 'effect 8 pricing', 'the status dot pulse is running');
+  expect(pulse.onScreen && pulse.running, 'effect 8 pricing', 'the status dot pulse runs while it is on screen');
 
   // 8. pricing slider
   await scrollToId(page, '#pricing');
@@ -305,11 +359,30 @@ const overflow = page => page.evaluate(() => document.documentElement.scrollWidt
   expect(Number.parseFloat(priceAfter.left) > 0, 'effect 8 pricing', 'the label is positioned by the slider clamp');
   await page.screenshot({ path: join(OUT, 'desktop-pricing.png') });
 
-  // 3. word-pair headline
+  // 3. word-pair headline: a complete second sentence must become visible
+  const sentences = await headlineSentences(page);
+  const firstSentence = firstHeadline;
   await scrollToId(page, '#cta');
   await page.waitForTimeout(500);
-  const words = await pollChange(page, () => headlineText(page), 5600);
-  expect(words.changed, 'effect 3 word swap', `the CTA headline swaps within 4s (“${words.first}” → “${words.next}”)`);
+  const words = await pollHeadline(page, sentences, firstSentence, 5600);
+  expect(words.changed, 'effect 3 word swap', `a complete second sentence becomes visible within 4s (“${firstSentence}” → “${words.next}”)`);
+
+  // finding 1: a live switch to reduce keeps static content and stops JS loops
+  await scrollToStackCard(page, 0, 0);
+  await page.waitForTimeout(400);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.waitForTimeout(700);
+  const badgeStatic = await badgeText(page);
+  const litSamples = await loaderSamples(page);
+  const headA = await headlineText(page);
+  await page.waitForTimeout(900);
+  const badgeStatic2 = await badgeText(page);
+  const headB = await headlineText(page);
+  expect(badgeStatic.length > 0 && badgeStatic === badgeStatic2, 'reduced-motion', `a live switch keeps a badge pill readable (“${badgeStatic}”)`);
+  expect(litSamples.length === 1, 'reduced-motion', `a live switch stops the pixel loader (lit ${litSamples.join('/')})`);
+  expect(headA.length > 0 && headA === headB, 'reduced-motion', 'a live switch keeps a complete headline visible and still');
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.waitForTimeout(400);
 
   // overflow, also at 320px
   await scrollTo(page, 0);
@@ -341,6 +414,7 @@ const overflow = page => page.evaluate(() => document.documentElement.scrollWidt
   await page.goto(`${origin}/explee/`, { waitUntil: 'networkidle' });
   await page.waitForTimeout(500);
   await page.screenshot({ path: join(OUT, 'mobile-fold.png') });
+  const firstHeadline = await headlineText(page);
 
   const canvases = await canvasInfo(page);
   expect(canvases.length === 2 && canvases.every(c => c.w === 0), 'effect 1 hero', `flow canvases collapse to zero width at 390 (${canvases.map(c => c.w).join(', ')})`);
@@ -422,11 +496,13 @@ const overflow = page => page.evaluate(() => document.documentElement.scrollWidt
   }));
   expect(after.tag === '$70' && after.emails !== before, 'effect 8 pricing', `mobile slider updates the label and tiles (${before} → ${after.emails})`);
 
-  // 3. word swap
+  // 3. word swap: a complete second sentence must become visible
+  const sentences = await headlineSentences(page);
+  const firstSentence = firstHeadline;
   await scrollToId(page, '#cta');
   await page.waitForTimeout(500);
-  const words = await pollChange(page, () => headlineText(page), 5600);
-  expect(words.changed, 'effect 3 word swap', `mobile headline swaps (“${words.first}” → “${words.next}”)`);
+  const words = await pollHeadline(page, sentences, firstSentence, 5600);
+  expect(words.changed, 'effect 3 word swap', `mobile headline swaps to a complete sentence (“${firstSentence}” → “${words.next}”)`);
 
   await scrollTo(page, 0);
   await page.waitForTimeout(1800);
@@ -477,6 +553,17 @@ const overflow = page => page.evaluate(() => document.documentElement.scrollWidt
 
   await page.screenshot({ path: join(OUT, 'reduced-fold.png') });
   await page.screenshot({ path: join(OUT, 'reduced-full.png'), fullPage: true });
+
+  // finding 5: the JS loader timer must be off too, not just the CSS animations
+  await scrollToId(page, '#pipeline');
+  await page.waitForTimeout(400);
+  const litSamples = await loaderSamples(page);
+  expect(litSamples.length === 1, 'reduced-motion', `the pixel loader is static under reduced motion (lit ${litSamples.join('/')})`);
+  await scrollToStackCard(page, 5, 0);
+  await page.waitForTimeout(400);
+  const cssLoops = await page.evaluate(() => document.getAnimations()
+    .filter(a => a.playState === 'running' && (a.animationName === 'spin' || a.animationName === 'status-pulse')).length);
+  expect(cssLoops === 0, 'reduced-motion', 'the spinner and the status pulse do not run');
 
   await ctx.close();
 }

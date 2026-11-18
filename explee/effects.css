@@ -581,6 +581,10 @@ h2 {
 .camp-status--off { color: var(--muted); }
 .camp-status--off .status-dot { background: #b9beb9; }
 
+/* CSS loops stay paused while their element is outside the viewport */
+.spin.is-paused,
+.status-dot.is-paused { animation-play-state: paused; }
+
 /* ---------- effect 6: count-up + tilt ---------- */
 
 .stat-grid {

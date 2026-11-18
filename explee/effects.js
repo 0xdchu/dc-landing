@@ -309,13 +309,27 @@
 
     let current = 0;
     let visible = true;
+    let startTimer = 0;
+    let interval = 0;
 
     const io = new IntersectionObserver(entries => {
       visible = entries[0].isIntersecting;
     }, { rootMargin: '60px' });
     io.observe(badge);
 
-    if (reduced()) return;
+    const stop = () => {
+      window.clearTimeout(startTimer);
+      window.clearInterval(interval);
+      startTimer = 0;
+      interval = 0;
+    };
+
+    const showStatic = () => {
+      stop();
+      pills.forEach((pill, i) => {
+        pill.dataset.state = i === current ? 'shown' : 'hidden';
+      });
+    };
 
     const swap = () => {
       if (!visible) return;
@@ -325,10 +339,27 @@
       current = next;
     };
 
-    window.setTimeout(() => {
-      swap();
-      window.setInterval(swap, 4000);
-    }, 600);
+    const start = () => {
+      stop();
+      if (reduced()) {
+        showStatic();
+        return;
+      }
+      pills.forEach((pill, i) => {
+        pill.dataset.state = i === current ? 'shown' : 'hidden';
+      });
+      startTimer = window.setTimeout(() => {
+        swap();
+        interval = window.setInterval(swap, 4000);
+      }, 600);
+    };
+
+    reduceQuery.addEventListener('change', () => {
+      if (reduced()) showStatic();
+      else start();
+    });
+
+    start();
   }
 
   /* --------------------------------------------------------- */
@@ -347,22 +378,48 @@
       });
     });
 
-    if (reduced()) return;
-
     let current = 0;
     let visible = true;
+    let interval = 0;
+
     const io = new IntersectionObserver(entries => {
       visible = entries[0].isIntersecting;
     }, { rootMargin: '60px' });
     io.observe(swap);
 
-    window.setInterval(() => {
-      if (!visible) return;
-      const next = (current + 1) % lines.length;
-      lines[current].dataset.state = 'exit';
-      lines[next].dataset.state = 'enter';
-      current = next;
-    }, 3000);
+    const showStatic = () => {
+      window.clearInterval(interval);
+      interval = 0;
+      lines.forEach((line, i) => {
+        line.dataset.state = i === current ? 'shown' : 'hidden';
+      });
+    };
+
+    const start = () => {
+      window.clearInterval(interval);
+      interval = 0;
+      if (reduced()) {
+        showStatic();
+        return;
+      }
+      lines.forEach((line, i) => {
+        line.dataset.state = i === current ? 'shown' : 'hidden';
+      });
+      interval = window.setInterval(() => {
+        if (!visible) return;
+        const next = (current + 1) % lines.length;
+        lines[current].dataset.state = 'exit';
+        lines[next].dataset.state = 'enter';
+        current = next;
+      }, 3000);
+    };
+
+    reduceQuery.addEventListener('change', () => {
+      if (reduced()) showStatic();
+      else start();
+    });
+
+    start();
   }
 
   /* ------------------------------------------------------------ */
@@ -403,7 +460,7 @@
           else if (row.scrollLeft > copyWidth * 2.25) row.scrollLeft -= copyWidth;
         }, { passive: true });
 
-        if (hoverCapable.matches && !reduced()) {
+        if (hoverCapable.matches) {
           row.addEventListener('pointerenter', () => { hovering = true; });
           row.addEventListener('pointerleave', () => { hovering = false; });
         }
@@ -464,6 +521,7 @@
 
         // rows drift from paint; the observer pauses them off-screen
         sync();
+        reduceQuery.addEventListener('change', sync);
         if (reduced()) row.dataset.drift = '0';
       }
 
@@ -528,6 +586,16 @@
     }, { rootMargin: '200px 0px' });
     io.observe(stack);
 
+    reduceQuery.addEventListener('change', () => {
+      if (reduced()) {
+        cards.forEach(card => {
+          card.style.transform = '';
+          delete card.dataset.scale;
+        });
+      }
+      sync();
+    });
+
     // give every card but the last enough margin to travel with the pile
     function alignPile() {
       const n = cards.length;
@@ -591,15 +659,28 @@
 
     render();
 
+    const listIO = new IntersectionObserver(entries => {
+      listVisible = entries[0].isIntersecting;
+      if (listVisible && !reduced()) schedule(revealed >= rows.length ? 3000 : 800);
+    }, { rootMargin: '0px' });
+    listIO.observe(list);
+
+    reduceQuery.addEventListener('change', () => {
+      window.clearTimeout(timer);
+      if (reduced()) {
+        revealed = rows.length;
+        render();
+      } else {
+        revealed = 0;
+        render();
+        schedule(800);
+      }
+    });
+
     if (reduced()) {
       revealed = rows.length;
       render();
     } else {
-      const listIO = new IntersectionObserver(entries => {
-        listVisible = entries[0].isIntersecting;
-        if (listVisible && revealed < rows.length) schedule(800);
-      }, { rootMargin: '0px' });
-      listIO.observe(list);
       schedule(800);
     }
 
@@ -629,6 +710,7 @@
     };
 
     let started = false;
+    let countRaf = 0;
 
     function run() {
       const duration = 900;
@@ -637,47 +719,53 @@
         const t = Math.min(1, (now - t0) / duration);
         const eased = 1 - Math.pow(1 - t, 3);
         items.forEach(item => show(item, item.target * eased));
-        if (t < 1) requestAnimationFrame(tick);
+        countRaf = t < 1 && !reduced() ? requestAnimationFrame(tick) : 0;
       };
-      requestAnimationFrame(tick);
+      countRaf = requestAnimationFrame(tick);
     }
 
-    if (reduced()) {
-      items.forEach(item => show(item, item.target));
-    } else {
-      items.forEach(item => show(item, 0));
+    // reset ahead of time so the final value never flashes before the count
+    const near = new IntersectionObserver(entries => {
+      if (started || reduced()) return;
+      entries.forEach(entry => { if (entry.isIntersecting) items.forEach(item => show(item, 0)); });
+    }, { rootMargin: '0px 0px 400px 0px' });
+    near.observe(section);
 
-      // reset ahead of time so the final value never flashes before the count
-      const near = new IntersectionObserver(entries => {
-        if (started) return;
-        entries.forEach(entry => { if (entry.isIntersecting) items.forEach(item => show(item, 0)); });
-      }, { rootMargin: '0px 0px 400px 0px' });
-      near.observe(section);
+    const inView = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !started && !reduced()) {
+          started = true;
+          run();
+        }
+      });
+    }, { threshold: 0.4 });
+    inView.observe(section);
 
-      const inView = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting && !started) {
-            started = true;
-            run();
-          }
+    if (reduced()) items.forEach(item => show(item, item.target));
+    else items.forEach(item => show(item, 0));
+
+    const cards = Array.from(section.querySelectorAll('.stat-card'));
+    if (hoverCapable.matches && window.matchMedia('(pointer: fine)').matches) {
+      window.addEventListener('mousemove', event => {
+        if (reduced()) return;
+        cards.forEach(card => {
+          const rect = card.getBoundingClientRect();
+          const dx = (event.clientX - (rect.left + rect.width / 2)) / (window.innerWidth / 2);
+          const dy = (event.clientY - (rect.top + rect.height / 2)) / (window.innerHeight / 2);
+          const ry = Math.max(-8, Math.min(8, dx * 8));
+          const rx = Math.max(-8, Math.min(8, -dy * 8));
+          card.style.transform = `perspective(900px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg)`;
         });
-      }, { threshold: 0.4 });
-      inView.observe(section);
-
-      if (hoverCapable.matches && window.matchMedia('(pointer: fine)').matches) {
-        const cards = Array.from(section.querySelectorAll('.stat-card'));
-        window.addEventListener('mousemove', event => {
-          cards.forEach(card => {
-            const rect = card.getBoundingClientRect();
-            const dx = (event.clientX - (rect.left + rect.width / 2)) / (window.innerWidth / 2);
-            const dy = (event.clientY - (rect.top + rect.height / 2)) / (window.innerHeight / 2);
-            const ry = Math.max(-8, Math.min(8, dx * 8));
-            const rx = Math.max(-8, Math.min(8, -dy * 8));
-            card.style.transform = `perspective(900px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg)`;
-          });
-        }, { passive: true });
-      }
+      }, { passive: true });
     }
+
+    reduceQuery.addEventListener('change', () => {
+      if (!reduced()) return;
+      cancelAnimationFrame(countRaf);
+      countRaf = 0;
+      items.forEach(item => show(item, item.target));
+      cards.forEach(card => { card.style.transform = ''; });
+    });
   }
 
   /* -------------------------------------------- */
@@ -710,13 +798,22 @@
     }, { rootMargin: '50px' });
     io.observe(loader);
 
-    if (reduced()) return;
+    const start = () => {
+      window.clearInterval(timer);
+      timer = 0;
+      if (reduced()) {
+        draw();
+        return;
+      }
+      timer = window.setInterval(() => {
+        if (!visible) return;
+        step += 1;
+        draw();
+      }, 150);
+    };
 
-    timer = window.setInterval(() => {
-      if (!visible) return;
-      step += 1;
-      draw();
-    }, 150);
+    reduceQuery.addEventListener('change', start);
+    start();
   }
 
   /* ----------------------------------------------- */
@@ -769,6 +866,21 @@
     update();
   }
 
+  /* ------------------------------------------------------ */
+  /* CSS loops (spinner, status pulse) stop off-screen       */
+  /* ------------------------------------------------------ */
+
+  function pauseOffscreenAnimations() {
+    const targets = Array.from(document.querySelectorAll('.spin, .status-dot'));
+    if (!targets.length) return;
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        entry.target.classList.toggle('is-paused', !entry.isIntersecting);
+      });
+    }, { rootMargin: '100px' });
+    targets.forEach(target => io.observe(target));
+  }
+
   /* boot: one line per effect so each can be removed for the bite test */
   initFlow();
   initBadge();
@@ -778,4 +890,5 @@
   initCountUp();
   initLoader();
   initPricing();
+  pauseOffscreenAnimations();
 })();

@@ -49,7 +49,8 @@ independent reviewer reviews.
 
 ## Result
 
-1. PASS, `node explee/check.mjs` exit 0 (run by the main session with `set -o pipefail`): 52 assertions, desktop
+1. PASS, `node explee/check.mjs` exit 0 (run by the main session with `set -o pipefail`): 59 assertions after review
+   round 1 (52 before), desktop
    1440×900, mobile 390×844 (touch, DPR 2) and desktop reduced motion; no overflow at 1440/390/320, no external or
    failed request, no console error.
 2. PASS, run by the builder on scratch copies in `/tmp` (deleted after): removing each `init*()` call made the check
@@ -63,3 +64,8 @@ independent reviewer reviews.
    right). Main session compared them: the stacked heading was cut by the pile and headings were too heavy; the
    builder fixed both and added a "heading ends above the first card" assertion at both widths. Owner visual check:
    not run.
+6. FAIL (review round 2, ExpleeReview, at 0b86935): 1 MAJOR. Switching to reduced motion while the agent list is in
+   view marks every row done and fires the rows' 300 ms opacity/transform transitions; `.agent-row` is missing from
+   the reduced-motion override (`explee/effects.js:669–672`, `explee/effects.css`), and the check waits 700 ms so it
+   misses them. Round 1 (at 8195e17) failed with 6 MAJOR + 1 MINOR, all confirmed fixed in round 2. Second FAIL of
+   T2: the run stops here per /sdlc and goes to the owner.

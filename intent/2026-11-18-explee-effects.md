@@ -1,5 +1,5 @@
 ---
-status: verified (owner approved 2026-11-18, form answers: deliverable both, effects 1-8, no integration; one-prompt run; push + PR, no merge)  # draft → approved → planned → building → verified → shipped (PR #n)
+status: shipped (PR #3)  # draft → approved → planned → building → verified → shipped (PR #n)
 ---
 # explee.org effects: teardown and a working recreation
 

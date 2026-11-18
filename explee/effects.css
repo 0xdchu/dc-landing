@@ -862,7 +862,8 @@ h2 {
   .hero-go,
   .hero-input,
   .stack-card,
-  .stat-card {
+  .stat-card,
+  .agent-row {
     animation: none !important;
     transition: none !important;
   }

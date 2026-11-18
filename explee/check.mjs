@@ -369,8 +369,17 @@ const overflow = page => page.evaluate(() => document.documentElement.scrollWidt
 
   // finding 1: a live switch to reduce keeps static content and stops JS loops
   await scrollToStackCard(page, 0, 0);
-  await page.waitForTimeout(400);
+  // switch while some agent rows are still hidden, so marking them done would start their transitions
+  await page.waitForFunction(() => !!document.querySelector('#agent-list .agent-row[data-state="pending"]'), null, { timeout: 6000 }).catch(() => {});
+  const rowsPending = await page.evaluate(() => document.querySelectorAll('#agent-list .agent-row[data-state="pending"]').length);
   await page.emulateMedia({ reducedMotion: 'reduce' });
+  const switchMotion = await page.evaluate(() => new Promise((resolve) => {
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve(document.getAnimations()
+      .filter((a) => a.playState === 'running')
+      .map((a) => `${a.constructor.name}:${a.transitionProperty || a.animationName}@${String(a.effect?.target?.className || '').split(' ')[0]}`))));
+  }));
+  expect(rowsPending > 0, 'reduced-motion', `the live switch happens while agent rows are still pending (${rowsPending})`);
+  expect(switchMotion.length === 0, 'reduced-motion', `a live switch starts no transition or animation (${switchMotion.join(', ') || 'none'})`);
   await page.waitForTimeout(700);
   const badgeStatic = await badgeText(page);
   const litSamples = await loaderSamples(page);

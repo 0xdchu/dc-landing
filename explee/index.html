@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fernway — eight homepage motion techniques (demo)</title>
+<meta name="description" content="A dependency-free recreation of eight homepage animation techniques — flow lines, badge swap, word swap, marquee, sticky stack, count-up, pixel loader and pricing slider. Fictional product, sample numbers.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%2310b981'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="effects.css">
+<script src="effects.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="logo" href="#top">
+      <span class="logo-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      <span class="logo-word">fernway</span>
+      <span class="logo-tag">motion demo</span>
+    </a>
+    <nav class="nav" aria-label="Main">
+      <a href="#pipeline">Product</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#voices">Customers</a>
+      <a href="#stats">Numbers</a>
+      <a href="#cta">Start free</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- 1: hero flow lines, 2: rotating stat badge -->
+  <section class="hero">
+    <div class="wrap hero-inner">
+      <div class="stat-badge" id="badge" aria-live="off">
+        <span class="badge-pill" data-state="shown">$9 median cost per lead</span>
+        <span class="badge-pill" data-state="hidden">1,204 sample buyers matched</span>
+      </div>
+
+      <h1>Get <span class="accent">1 to 3 new buyers</span> for your stems in a day</h1>
+
+      <p class="hero-pills">
+        <span class="pill">No sales hire needed</span>
+        <span class="pill"><span class="pill-ico" aria-hidden="true">✳</span> Free sample list</span>
+      </p>
+
+      <div class="hero-input-row" id="hero-input-row" data-speed="0.2">
+        <div class="flow-wrap flow-wrap--left" data-flow>
+          <canvas class="flow-canvas" data-flow-canvas aria-hidden="true"></canvas>
+        </div>
+        <div class="flow-wrap flow-wrap--right" data-flow>
+          <canvas class="flow-canvas" data-flow-canvas aria-hidden="true"></canvas>
+        </div>
+
+        <form class="hero-input" id="hero-input" autocomplete="off">
+          <label class="sr-only" for="site">Your website</label>
+          <input id="site" name="site" type="text" inputmode="url" placeholder="Your site, e.g. yourgrower.com">
+          <button class="hero-go" type="submit">
+            <span class="sr-only">Find my buyers</span>
+            <span aria-hidden="true">→</span>
+          </button>
+        </form>
+      </div>
+
+      <a class="hero-skip" href="#pipeline">I don’t have a website</a>
+
+      <p class="hero-sub">Fernway researches the wholesale market, writes to the shops that already sell your stems,
+        and books the calls — you pack the boxes.</p>
+    </div>
+  </section>
+
+  <!-- 4: testimonial marquee -->
+  <section class="section voices" id="voices">
+    <div class="wrap">
+      <h2>What growers and buyers say</h2>
+    </div>
+
+    <div class="marquee marquee--desktop" aria-label="Customer quotes">
+      <div class="marquee-row" data-marquee="desktop" data-dir="1">
+        <article class="quote-card">
+          <p class="quote">“We filled two wholesale accounts in the first month without hiring anyone.”</p>
+          <footer class="quote-by"><span class="avatar" style="--tint:#e8f5ee;--ink:#0b7a56" aria-hidden="true">RP</span><span class="quote-name"><strong>Rowan Pike</strong><span>Owner · Petal &amp; Stem</span></span></footer>
+        </article>
+        <article class="quote-card">
+          <p class="quote">“The emails read like a grower wrote them, because they know our stock.”</p>
+          <footer class="quote-by"><span class="avatar" style="--tint:#f4efe2;--ink:#8a6a22" aria-hidden="true">IA</span><span class="quote-name"><strong>Ines Aubry</strong><span>Buyer · Maison Fleur</span></span></footer>
+        </article>
+        <article class="quote-card">
+          <p class="quote">“I stopped cold-calling event planners. Fernway found the ones who answer.”</p>
+          <footer class="quote-by"><span class="avatar" style="--tint:#e9eef8;--ink:#3b5a99" aria-hidden="true">TL</span><span class="quote-name"><strong>Tobias Lund</strong><span>Nordic Blooms</span></span></footer>
+        </article>
+        <article class="quote-card">
+          <p class="quote">“Four new shops in one week, and none of them turned into a price fight.”</p>
+          <footer class="quote-by"><span class="avatar" style="--tint:#fbeae6;--ink:#a5442d" aria-hidden="true">PR</span><span class="quote-name"><strong>Priya Raman</strong><span>Saffron &amp; Sage</span></span></footer>
+        </article>
+        <article class="quote-card">
+          <p class="quote">“The shortlist was tiny and every name was real. That is the whole trick.”</p>
+          <footer class="quote-by"><span class="avatar" style="--tint:#efe8f6;--ink:#6b4396" aria-hidden="true">MR</span><span class="quote-name"><strong>Mateo Rivas</strong><span>Casa Verde</span></span></footer>
+        </article>
+        <article class="quote-card">
+          <p class="quote">“Booked calls, not clicks. My calendar finally looks like a sales team’s.”</p>
+          <footer class="quote-by"><span class="avatar" style="--tint:#e6f1f4;--ink:#24666f" aria-hidden="true">HS</span><span class="quote-name"><strong>Hana Sato</strong><span>Kiku House</span></span></footer>
+        </article>
+      </div>
+
+      <div class="marquee-row" data-marquee="desktop" data-dir="-1">
+        <article class="quote-card">
+          <p class="quote">“We are two people in a cold room. This is the third pair of hands.”</p>
+          <footer class="quote-by"><span class="avatar" style="--tint:#e8f5ee;--ink:#0b7a56" aria-hidden="true">LV</span><span class="quote-name"><strong>Lena Voss</strong><span>Voss Floristik</span></span></footer>
+        </article>
+        <article class="quote-card">
+          <p class="quote">“It found the florist who supplies every hotel on the coast. I would never have guessed.”</p>
+          <footer class="quote-by"><span class="avatar" style="--tint:#f4efe2;--ink:#8a6a22" aria-hidden="true">AO</span><span class="quote-name"><strong>Amara Osei</strong><span>Bloom Union</span></span></footer>
+        </article>
+        <article class="quote-card">
+          <p class="quote">“The follow-up ran while we packed a wedding. Nobody noticed it was software.”</p>
+          <footer class="quote-by"><span class="avatar" style="--tint:#e9eef8;--ink:#3b5a99" aria-hidden="true">JB</span><span class="quote-name"><strong>Jonas Berg</strong><span>Berg Blomster</span></span></footer>
+        </article>
+        <article class="quote-card">
+          <p class="quote">“Four replies the first week, two of them asked for a price list.”</p>
+          <footer class="quote-by"><span class="avatar" style="--tint:#fbeae6;--ink:#a5442d" aria-hidden="true">CM</span><span class="quote-name"><strong>Clara Mendes</strong><span>Fleur Clara</span></span></footer>
+        </article>
+        <article class="quote-card">
+          <p class="quote">“Every message named our peonies and their shop. No template smell.”</p>
+          <footer class="quote-by"><span class="avatar" style="--tint:#efe8f6;--ink:#6b4396" aria-hidden="true">DA</span><span class="quote-name"><strong>Diego Alvarez</strong><span>Ramo Studio</span></span></footer>
+        </article>
+        <article class="quote-card">
+          <p class="quote">“I asked for shops within 30 km. It found six and skipped the chains.”</p>
+          <footer class="quote-by"><span class="avatar" style="--tint:#e6f1f4;--ink:#24666f" aria-hidden="true">NB</span><span class="quote-name"><strong>Nia Brooks</strong><span>Brooks Botanics</span></span></footer>
+        </article>
+      </div>
+
+      <div class="marquee-row" data-marquee="desktop" data-dir="1">
+        <article class="quote-card">
+          <p class="quote">“The best part is the silence: no dashboard to babysit, just calls.”</p>
+          <footer class="quote-by"><span class="avatar" style="--tint:#e8f5ee;--ink:#0b7a56" aria-hidden="true">ED</span><span class="quote-name"><strong>Elin Dahl</strong><span>Dahl &amp; Co</span></span></footer>
+        </article>
+        <article class="quote-card">
+          <p class="quote">“Our first wholesale client came from an email I did not write.”</p>
+          <footer class="quote-by"><span class="avatar" style="--tint:#f4efe2;--ink:#8a6a22" aria-hidden="true">FH</span><span class="quote-name"><strong>Farid Haddad</strong><span>Cedar &amp; Rose</span></span></footer>
+        </article>
+        <article class="quote-card">
+          <p class="quote">“It found buyers for the stems we usually compost. That paid for the year.”</p>
+          <footer class="quote-by"><span class="avatar" style="--tint:#e9eef8;--ink:#3b5a99" aria-hidden="true">SM</span><span class="quote-name"><strong>Sofia Marchetti</strong><span>Fiori Sofia</span></span></footer>
+        </article>
+        <article class="quote-card">
+          <p class="quote">“Two samples out, one standing order. That was week three.”</p>
+          <footer class="quote-by"><span class="avatar" style="--tint:#fbeae6;--ink:#a5442d" aria-hidden="true">OT</span><span class="quote-name"><strong>Owen Tate</strong><span>Tate Blooms</span></span></footer>
+        </article>
+        <article class="quote-card">
+          <p class="quote">“We sell to florists, not to software. Fernway understood that on day one.”</p>
+          <footer class="quote-by"><span class="avatar" style="--tint:#efe8f6;--ink:#6b4396" aria-hidden="true">MN</span><span class="quote-name"><strong>Mila Novak</strong><span>Novak Kvety</span></span></footer>
+        </article>
+        <article class="quote-card">
+          <p class="quote">“A list I could check by hand, then a conversation I could actually have.”</p>
+          <footer class="quote-by"><span class="avatar" style="--tint:#e6f1f4;--ink:#24666f" aria-hidden="true">RK</span><span class="quote-name"><strong>Ruth Kim</strong><span>Hanok Flowers</span></span></footer>
+        </article>
+      </div>
+    </div>
+
+    <div class="marquee marquee--mobile">
+      <div class="marquee-row" data-marquee="mobile" aria-label="Customer quotes">
+        <article class="quote-card">
+          <p class="quote">“We filled two wholesale accounts in the first month without hiring anyone.”</p>
+          <footer class="quote-by"><span class="avatar" style="--tint:#e8f5ee;--ink:#0b7a56" aria-hidden="true">RP</span><span class="quote-name"><strong>Rowan Pike</strong><span>Owner · Petal &amp; Stem</span></span></footer>
+        </article>
+        <article class="quote-card">
+          <p class="quote">“The emails read like a grower wrote them, because they know our stock.”</p>
+          <footer class="quote-by"><span class="avatar" style="--tint:#f4efe2;--ink:#8a6a22" aria-hidden="true">IA</span><span class="quote-name"><strong>Ines Aubry</strong><span>Buyer · Maison Fleur</span></span></footer>
+        </article>
+        <article class="quote-card">
+          <p class="quote">“I stopped cold-calling event planners. Fernway found the ones who answer.”</p>
+          <footer class="quote-by"><span class="avatar" style="--tint:#e9eef8;--ink:#3b5a99" aria-hidden="true">TL</span><span class="quote-name"><strong>Tobias Lund</strong><span>Nordic Blooms</span></span></footer>
+        </article>
+        <article class="quote-card">
+          <p class="quote">“Four new shops in one week, and none of them turned into a price fight.”</p>
+          <footer class="quote-by"><span class="avatar" style="--tint:#fbeae6;--ink:#a5442d" aria-hidden="true">PR</span><span class="quote-name"><strong>Priya Raman</strong><span>Saffron &amp; Sage</span></span></footer>
+        </article>
+        <article class="quote-card">
+          <p class="quote">“The shortlist was tiny and every name was real. That is the whole trick.”</p>
+          <footer class="quote-by"><span class="avatar" style="--tint:#efe8f6;--ink:#6b4396" aria-hidden="true">MR</span><span class="quote-name"><strong>Mateo Rivas</strong><span>Casa Verde</span></span></footer>
+        </article>
+        <article class="quote-card">
+          <p class="quote">“Booked calls, not clicks. My calendar finally looks like a sales team’s.”</p>
+          <footer class="quote-by"><span class="avatar" style="--tint:#e6f1f4;--ink:#24666f" aria-hidden="true">HS</span><span class="quote-name"><strong>Hana Sato</strong><span>Kiku House</span></span></footer>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5: sticky pipeline stack, 7: pixel loader -->
+  <section class="section pipeline" id="pipeline">
+    <div class="pipeline-inner wrap">
+      <h2 class="pipeline-head">The agent runs the whole loop</h2>
+
+      <div class="stack" id="stack">
+        <article class="stack-card" data-stack-card data-i="0" style="--i:0">
+          <div class="stack-copy">
+            <h3>Researches your market</h3>
+            <p>Reads your catalogue and your region, then studies the shops that already sell stems like yours —
+              before a single email goes out.</p>
+          </div>
+          <div class="mock">
+            <div class="panel agent-panel">
+              <div class="agent-head">
+                <span class="pixel-loader" id="loader" data-lit="0" aria-hidden="true"><span data-index="0" data-on="true"></span><span data-index="1" data-on="false"></span><span data-index="2" data-on="false"></span><span data-index="3" data-on="false"></span></span>
+                <span class="agent-status">agent is studying buyers…</span>
+              </div>
+              <ol class="agent-list" id="agent-list" data-tick="0">
+                <li class="agent-row" data-state="current">
+                  <span class="row-icon" aria-hidden="true"><span class="spin"></span><span class="tick">✓</span></span>
+                  <span>Reads your catalogue</span>
+                </li>
+                <li class="agent-row" data-state="pending">
+                  <span class="row-icon" aria-hidden="true"><span class="spin"></span><span class="tick">✓</span></span>
+                  <span>Maps 40 local florists</span>
+                </li>
+                <li class="agent-row" data-state="pending">
+                  <span class="row-icon" aria-hidden="true"><span class="spin"></span><span class="tick">✓</span></span>
+                  <span>Checks who stocks imported stems</span>
+                </li>
+                <li class="agent-row" data-state="pending">
+                  <span class="row-icon" aria-hidden="true"><span class="spin"></span><span class="tick">✓</span></span>
+                  <span>Scores event planners</span>
+                </li>
+                <li class="agent-row" data-state="pending">
+                  <span class="row-icon" aria-hidden="true"><span class="spin"></span><span class="tick">✓</span></span>
+                  <span>Skips chains and resellers</span>
+                </li>
+                <li class="agent-row" data-state="pending">
+                  <span class="row-icon" aria-hidden="true"><span class="spin"></span><span class="tick">✓</span></span>
+                  <span>Shortlists 12 buyers</span>
+                </li>
+              </ol>
+            </div>
+          </div>
+        </article>
+
+        <article class="stack-card" data-stack-card data-i="1" style="--i:1">
+          <div class="stack-copy">
+            <h3>Scores every shop</h3>
+            <p>Fit is a number from 0 to 100: what they sell, how often they restock, how far they drive.
+              The bottom of the list never gets an email.</p>
+          </div>
+          <div class="mock">
+            <div class="panel">
+              <div class="fit-head"><span>Buyer</span><span>Region</span><span>Fit</span></div>
+              <div class="fit-row"><span>Petal &amp; Stem</span><span>Portland</span><span class="fit-cell"><strong>94</strong><span class="fit-bar"><i style="--w:94%"></i></span></span></div>
+              <div class="fit-row"><span>Casa Verde</span><span>Austin</span><span class="fit-cell"><strong>88</strong><span class="fit-bar"><i style="--w:88%"></i></span></span></div>
+              <div class="fit-row"><span>Kiku House</span><span>Seattle</span><span class="fit-cell"><strong>81</strong><span class="fit-bar"><i style="--w:81%"></i></span></span></div>
+              <div class="fit-row"><span>Bloom Union</span><span>Denver</span><span class="fit-cell"><strong>76</strong><span class="fit-bar"><i style="--w:76%"></i></span></span></div>
+            </div>
+          </div>
+        </article>
+
+        <article class="stack-card" data-stack-card data-i="2" style="--i:2">
+          <div class="stack-copy">
+            <h3>Finds the buyers who already sell stems</h3>
+            <p>A name, a role and a working address for each shop — checked against the site that shop
+              actually updates, not a database from 2019.</p>
+          </div>
+          <div class="mock">
+            <div class="people">
+              <div class="person"><span class="avatar" style="--tint:#e8f5ee;--ink:#0b7a56" aria-hidden="true">RP</span><span class="person-txt"><strong>Rowan Pike</strong><span>Owner · Petal &amp; Stem</span><span class="mail">rowan@petalandstem.example</span></span></div>
+              <div class="person"><span class="avatar" style="--tint:#f4efe2;--ink:#8a6a22" aria-hidden="true">IA</span><span class="person-txt"><strong>Ines Aubry</strong><span>Buyer · Maison Fleur</span><span class="mail">ines@maisonfleur.example</span></span></div>
+              <div class="person"><span class="avatar" style="--tint:#e9eef8;--ink:#3b5a99" aria-hidden="true">TL</span><span class="person-txt"><strong>Tobias Lund</strong><span>Nordic Blooms</span><span class="mail">tobias@nordicblooms.example</span></span></div>
+              <div class="person"><span class="avatar" style="--tint:#fbeae6;--ink:#a5442d" aria-hidden="true">PR</span><span class="person-txt"><strong>Priya Raman</strong><span>Saffron &amp; Sage</span><span class="mail">priya@saffronsage.example</span></span></div>
+            </div>
+          </div>
+        </article>
+
+        <article class="stack-card" data-stack-card data-i="3" style="--i:3">
+          <div class="stack-copy">
+            <h3>Writes one email per buyer</h3>
+            <p>Short, specific, and about their shop. No mail-merge brackets, no “I hope this finds you well”.</p>
+          </div>
+          <div class="mock">
+            <div class="panel mail-panel">
+              <div class="mail-subject"><span>Subject</span><strong>Fernway × Maison Fleur</strong></div>
+              <p class="mail-body">Hi Ines,</p>
+              <p class="mail-body">Your Tuesday stall sells out of ranunculus by nine. We cut ours at dawn two hours
+                north and pack them in threes, so one crate covers a weekend of stalls.</p>
+              <p class="mail-body">Want this week’s list? Two crates, Thursday, no commitment.</p>
+            </div>
+          </div>
+        </article>
+
+        <article class="stack-card" data-stack-card data-i="4" style="--i:4">
+          <div class="stack-copy">
+            <h3>Answers replies and books the call</h3>
+            <p>It handles the back-and-forth in your voice, offers real delivery slots, and puts the meeting on
+              the calendar you already use.</p>
+          </div>
+          <div class="mock">
+            <div class="chat">
+              <p class="bubble bubble--in">Do these hold up in a warm shop window?</p>
+              <p class="bubble bubble--in">Could you deliver Thursday morning?</p>
+              <p class="bubble bubble--out">Thursday 6am works — two crates. Invite sent.</p>
+              <p class="booked"><span class="status-dot" aria-hidden="true"></span> Demo booked · Thu 06:00</p>
+            </div>
+          </div>
+        </article>
+
+        <article class="stack-card" data-stack-card data-i="5" style="--i:5">
+          <div class="stack-copy">
+            <h3>Keeps the campaigns running</h3>
+            <p>Every list is a campaign with a budget and a pace. Pause one, and the agent moves the budget to
+              the list that is answering.</p>
+          </div>
+          <div class="mock">
+            <div class="panel">
+              <div class="camp-head"><span>Campaign</span><span>Sent</span><span>Replies</span><span>Status</span></div>
+              <div class="camp-row"><span>Spring peonies</span><span>412</span><span>31</span><span class="camp-status"><i class="status-dot" aria-hidden="true"></i>Scaling</span></div>
+              <div class="camp-row"><span>Ranunculus list</span><span>288</span><span>19</span><span class="camp-status"><i class="status-dot" aria-hidden="true"></i>Working</span></div>
+              <div class="camp-row"><span>Event planners</span><span>176</span><span>12</span><span class="camp-status"><i class="status-dot" aria-hidden="true"></i>Scaling</span></div>
+              <div class="camp-row"><span>Dried stems</span><span>94</span><span>3</span><span class="camp-status camp-status--off"><i class="status-dot" aria-hidden="true"></i>Paused</span></div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6: count-up and tilt -->
+  <section class="section stats" id="stats">
+    <div class="wrap">
+      <h2>Three things it does without you</h2>
+      <p class="lede">Counted up once when the row comes into view; the cards lean towards your pointer.</p>
+      <div class="stat-grid">
+        <article class="stat-card">
+          <p class="stat-num" data-target="3200" data-suffix="+">3,200+</p>
+          <p class="stat-label">wholesale buyers in the sample index</p>
+        </article>
+        <article class="stat-card">
+          <p class="stat-num" data-target="97" data-suffix="%">97%</p>
+          <p class="stat-label">of sample emails landed in the inbox</p>
+        </article>
+        <article class="stat-card">
+          <p class="stat-num" data-target="14" data-suffix=" days">14 days</p>
+          <p class="stat-label">sample median to a first booked call</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8: pricing slider and pulse -->
+  <section class="section pricing" id="pricing">
+    <div class="wrap">
+      <h2>Pay as you go</h2>
+      <p class="lede">Slide to a monthly budget. Every tile below is a sample calculation, not a quote.</p>
+
+      <div class="price-card" style="--v:30">
+        <div class="price-range">
+          <span class="price-tag" id="price-tag">$30</span>
+          <label class="sr-only" for="budget">Monthly budget in dollars</label>
+          <input id="budget" type="range" min="0" max="100" step="1" value="30">
+        </div>
+        <div class="price-scale" aria-hidden="true"><span>$0</span><span>$100</span></div>
+
+        <div class="tiles">
+          <div class="tile"><span>Emails we send</span><strong data-tile="emails">750</strong></div>
+          <div class="tile"><span>Warm replies</span><strong data-tile="warm">~1.5–6</strong></div>
+          <div class="tile"><span>Meetings</span><strong data-tile="meetings">~0.7–1.4</strong></div>
+          <div class="tile"><span>Cost per lead</span><strong data-tile="cpl">~$8</strong></div>
+        </div>
+        <p class="fineprint">Sample rates: warm replies 0.2–0.8% of emails, meetings 0.09–0.18%.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3: word-pair headline swap -->
+  <section class="section cta" id="cta">
+    <div class="wrap cta-inner">
+      <h2 class="word-swap" id="cta-swap">
+        <span class="word-line" data-state="shown"><span class="word">Cold</span> <span class="word">lists</span> <span class="word">never</span> <span class="word">answer</span> <span class="word">back</span></span>
+        <span class="word-line" data-state="hidden"><span class="word">These</span> <span class="word">buyers</span> <span class="word">answer</span> <span class="word">within</span> <span class="word">a</span> <span class="word">day</span></span>
+        <span class="word-line" data-state="hidden"><span class="word">Another</span> <span class="word">tool,</span> <span class="word">another</span> <span class="word">tab</span></span>
+        <span class="word-line" data-state="hidden"><span class="word">One</span> <span class="word">agent,</span> <span class="word">one</span> <span class="word">short</span> <span class="word">morning</span></span>
+        <span class="word-line" data-state="hidden"><span class="word">You</span> <span class="word">still</span> <span class="word">chase</span> <span class="word">the</span> <span class="word">follow-up</span></span>
+        <span class="word-line" data-state="hidden"><span class="word">The</span> <span class="word">follow-up</span> <span class="word">chases</span> <span class="word">itself</span></span>
+      </h2>
+      <p class="cta-sub">A sample list, a sample email, and the three buyers we would start with.</p>
+      <a class="btn" href="#pricing">See a sample list</a>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <p><strong>Fernway is a fictional product.</strong> Every number on this page is a sample, used to show the
+      motion; nothing here is measured data. Built with no dependencies, no trackers and no external requests.</p>
+    <p class="footer-note">Eight techniques recreated from a public teardown: flow lines, badge swap, word swap,
+      marquee, sticky stack, count-up, pixel loader, slider.</p>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,4 +1,4 @@
-status: planned (owner approval 2026-11-18, one-prompt run from the intent form)  # draft → planned → building → verified
+status: building (owner approval 2026-11-18, one-prompt run from the intent form)  # draft → planned → building → verified
 
 # Plan: explee.org effects teardown and recreation
 
@@ -48,3 +48,18 @@ independent reviewer reviews.
 6. Independent reviewer PASS against the intent and this plan.
 
 ## Result
+
+1. PASS, `node explee/check.mjs` exit 0 (run by the main session with `set -o pipefail`): 52 assertions, desktop
+   1440×900, mobile 390×844 (touch, DPR 2) and desktop reduced motion; no overflow at 1440/390/320, no external or
+   failed request, no console error.
+2. PASS, run by the builder on scratch copies in `/tmp` (deleted after): removing each `init*()` call made the check
+   exit 1 on that effect's assertion, 8/8 (flow: canvases have pixels; badge: swaps within 5 s; word swap: swaps
+   within 4 s; marquee: rows drift; stack: earlier card scale 1; count-up: starts below target; loader: 0 → 0;
+   pricing: label follows slider). Tilt alone: removing its listener fails 1 assertion.
+3. PASS, `node scripts/check.mjs` exit 0.
+4. PASS, 8/8 sections in `explee/TEARDOWN.md`, each with desktop and mobile behaviour and chunk/CSS line references,
+   plus a mobile summary table.
+5. PASS (files): `.check/explee/side-1440-hero.png`, `side-1440-stack.png`, `side-390-hero.png` (explee left, ours
+   right). Main session compared them: the stacked heading was cut by the pile and headings were too heavy; the
+   builder fixed both and added a "heading ends above the first card" assertion at both widths. Owner visual check:
+   not run.

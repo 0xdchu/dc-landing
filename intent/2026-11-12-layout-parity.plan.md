@@ -2,7 +2,7 @@ status: verified (one-prompt run, started by the owner 2026-11-12) # draft → p
 
 # Plan: layout parity with the reference site
 
-Intent: `intent/2026-11-12-layout-parity.md` (approved). Branch: `layout-parity`. Repo: 0xdonniechu/dc-landing. Plane: LPP-2.
+Intent: `intent/2026-11-12-layout-parity.md` (approved). Branch: `layout-parity`. Repo: 0xdchu/dc-landing. Plane: LPP-2.
 
 ## How parity is measured
 - `scripts/parity.mjs` loads the reference and our page in the same local Chromium, with reduced motion so reveal transforms are settled. It runs at 1440, 1100, 950, 768 and 390 px, 900 px tall. Before measuring it waits for `document.fonts.ready` and scrolls the page once so lazy and revealed content is laid out.
